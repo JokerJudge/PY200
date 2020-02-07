@@ -501,6 +501,7 @@ class Date:
         pass
     
     @staticmethod
+    # разность даты
     def date2_date1(date2, date1):
         pass
 
