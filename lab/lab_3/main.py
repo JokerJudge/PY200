@@ -10,12 +10,45 @@
 from weakref import ref
 from structure_driver import *
 
+class Observer:
+    def update(self):
+        pass
 
-class LinkedList:
 
-    class Node:
+class Subject:
+    def __init__(self):
+        self.__o = set()
 
+    def add_observer(self, o: Observer):
+        self.__o.add(o)
+
+    def remove_observer(self, o: Observer):
+        self.__o.remove(o)
+
+    def notify(self):
+        for o in self.__o:
+            o.update()
+
+class Data(Subject):
+    def __init__(self, data):
+        super().__init__()  # нужно ли вызывать super?
+        self._data = data  # подумать как сделать так, чтобы при первой записи тоже уведомлялся observer
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        if self._data != data:
+            self._data = data
+            self.notify()
+
+class LinkedList(Observer):
+
+    class Node(Data):
         def __init__(self, prev_node=None, next_node=None, data=None):
+            super().__init__(data)
 
             if prev_node is not None and not isinstance(prev_node, type(self)):
                 raise TypeError('prev_node must be Node or None')
@@ -25,7 +58,7 @@ class LinkedList:
 
             self.prev_node_ = ref(prev_node) if prev_node is not None else None
             self.next_node_ = next_node
-            self.data = data
+            #self.data = data
 
         @property
         def prev_node(self):
@@ -76,9 +109,11 @@ class LinkedList:
                 current_node = current_node.next_node
 
             self.insert_next_node(current_node, data)
+            current_node.next_node.add_observer(self)
 
     def update(self):
         print("Something's changed")
+        self.save()
 
     def to_dict(self):
         d = {}
@@ -156,3 +191,5 @@ if __name__ == "__main__":
 
     l1.set_structure_driver(driver_builder.build())
     l1.save()
+
+    l1.head.next_node.data = 10
