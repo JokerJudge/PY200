@@ -122,11 +122,8 @@ class Ellipse(Figure):
 
 class CloseFigure(Figure):
     def __init__(self, *args):
-        d = []
-        for c_x, c_y in args:
-            temp = {"x": c_x, "y": c_y}
-            d.append(temp)
-        self.d = d # список словарей - пример: [{'x': 1, 'y': 2}, {'x': 5, 'y': 6}, {'x': 7, 'y': 4}]
+        self.d = [{"x": c_x, "y": c_y} for c_x, c_y in args]
+
                                                      
 if __name__ == '__main__':
 
