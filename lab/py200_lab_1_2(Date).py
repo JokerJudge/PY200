@@ -83,15 +83,7 @@ class Date:
 
 
     def __str__(self):
-        if 1 <= self.__day <= 9:
-            day = str(0) + str(self.__day) # делаем отображение нуля в днях и месяцах, если значение от 1 до 9
-        else:
-            day = self.__day
-        if 1 <= self.__month <= 9:
-            month = str(0) + str(self.__month)
-        else:
-            month = self.__month
-        return f'{day}.{month}.{self.__year}'
+        return f'{self.__day:0>2}.{self.__month:0>2}.{self.__year}'
 
     def __repr__(self):
         return f'Date({self.__year!r}, {self.__month!r}, {self.__day!r})'
