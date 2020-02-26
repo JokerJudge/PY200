@@ -15,24 +15,24 @@ class Observer:
         pass
 
 
-class Subject:
+class WeakSubject:
     def __init__(self):
         self.__o = set()
 
     def add_observer(self, o: Observer):
-        self.__o.add(o)
+        self.__o.add(ref(o))
 
     def remove_observer(self, o: Observer):
         self.__o.remove(o)
 
     def notify(self):
         for o in self.__o:
-            o.update()
+            o().update()
 
-class Data(Subject):
+class Data(WeakSubject):
     def __init__(self, data):
-        super().__init__()  # нужно ли вызывать super?
-        self._data = data  # подумать как сделать так, чтобы при первой записи тоже уведомлялся observer
+        super().__init__()
+        self._data = data
 
     @property
     def data(self):
@@ -192,4 +192,4 @@ if __name__ == "__main__":
     l1.set_structure_driver(driver_builder.build())
     l1.save()
 
-    l1.head.next_node.data = 10
+    l1.head.next_node.data = 132424
