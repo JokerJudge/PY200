@@ -342,7 +342,8 @@ return можно использовать, если мы уверены, что
 
 print("+++++++++++++++++++ № 11 +++++++++++++++")
 
-#from weakref import ref
+
+from weakref import ref
 
 class Node:
     def __init__(self, prev=None, next_=None, data = None):
@@ -352,7 +353,7 @@ class Node:
         if next_ is not None and not isinstance(next_, type(self)):
             raise TypeError('next_node must be Node or None')
 
-        self.prev = prev if prev is not None else None
+        self.prev = ref(prev) if prev is not None else None
         self.next_ = next_
         self.data = data
 
@@ -364,7 +365,7 @@ class Node:
     def set_prev(self, prev):
         if prev is not None and not isinstance(prev, type(self)):
             raise TypeError("prev must be Node or None")
-        self.prev = prev
+        self.prev = ref(prev)
 
     def get_value(self):
         return self.data
@@ -372,13 +373,9 @@ class Node:
     def set_value(self, data):
         self.data = data
 
-    # c перегруженными __str__ и __repr__ постоянно при обращении в классе Linkedlist к экземпляру Node выдавал RecursionError
+    def __str__(self):
+        return f"Node: {self.data}"
 
-    #def __str__(self):
-    #    return f"Node: {self.data}, Next node: {self.next_}, Previous node: {self.prev}"
-
-    #def __repr__(self):
-    #    return f"data={self.data}, next_={self.next_}, prev={self.prev}"
 
 class LinkedList:
     def __init__(self, nodes=None):
@@ -409,7 +406,7 @@ class LinkedList:
             raise TypeError("Передаваться должен Node или список из Node")
 
     def __len__(self): # считаем количество Node в Linkedlist
-        if self.head is None and self.tail is None:
+        if self.head is None:
             return 0
         elif self.head == self.tail:
             return 1
@@ -421,6 +418,16 @@ class LinkedList:
                 index += 1
                 current_node = current_node.next_
             return index
+
+    def __str__(self):
+        l = []
+        if self.head is None:
+            return f"{l}"
+        current_node = self.head
+        for i in range(len(self)):
+            l.append(current_node.data)
+            current_node = current_node.next_
+        return f"{l}"
 
     def linked_nodes(self, nodes):
         # установили ссылки для первого нода
@@ -454,8 +461,8 @@ class LinkedList:
                 i += 1
                 current_node = current_node.next_
             # устанавливаем связи, вставляя Node на нужное место
-            current_node.prev.set_next(node)
-            node.set_prev(current_node.prev)
+            current_node.prev().set_next(node)
+            node.set_prev(current_node.prev())
             current_node.set_prev(node)
             node.set_next(current_node)
         else:
@@ -469,7 +476,7 @@ class LinkedList:
         '''
         if not isinstance(node, Node):
             raise TypeError("В node был передан не Node")
-        if self.head is None and self.tail is None:
+        if self.head is None:
             self.head = node
             self.tail = node
         self.tail.set_next(node)
@@ -496,23 +503,13 @@ class LinkedList:
         '''
         Clear LinkedList
         '''
-        self.head.set_next(None)
-        self.head.set_prev(None)
-        self.tail.set_next(None)
-        self.tail.set_prev(None)
+        # self.head.set_next(None)
+        # self.head = None
+        # self.tail = None
+
+        del self.head.next_
         self.head = None
-        self.tail = None
-        # через удаление Node не получилось. Все равно почему-то Node внутри списка не удалялись.
-        # сделал в итоге через установкой всех атрибутов на None, чтобы сбились ссылки.
-        '''
-        # current_node = self.head
-        # for i in range(len(self)-1):
-        #     current_node = current_node.next_
-        #     print(current_node, current_node.data)
-        #     del current_node.prev
-        # del current_node
-        # print(self.head, self.head.data)
-        '''
+
 
     def find(self, node):
         '''
@@ -540,8 +537,8 @@ class LinkedList:
         current_node = self.head
         for i in range(len(self)):
             if node == current_node:
-                current_node.prev.set_next(current_node.next_)
-                current_node.next_.set_prev(current_node.prev)
+                current_node.prev().set_next(current_node.next_)
+                current_node.next_.set_prev(current_node.prev())
                 return
             current_node = current_node.next_
         print(f"{node} не был найден в {self}")
@@ -559,12 +556,13 @@ class LinkedList:
             current_node = self.head
             for i in range(len(self)):
                 if index == i:
-                    current_node.prev.set_next(current_node.next_)
-                    current_node.next_.set_prev(current_node.prev)
+                    current_node.prev().set_next(current_node.next_)
+                    current_node.next_.set_prev(current_node.prev())
                     return
                 current_node = current_node.next_
         else:
             raise ValueError("Индекс за пределами возможных значений")
+
 
 if __name__ == "__main__":
     # создадим 8 экземпляров Node
@@ -584,7 +582,10 @@ if __name__ == "__main__":
     l2.append(a4) # добавим в список а4
     l2.append_left(a5) # добавим а5 в начало списка
     l2.append(a6) # добавим в конец а6
-    l2.insert(a7, index=2) # вставим на место a2 (индекс 2) вставим a7. Теперь последовательность a1 - a7 - a2
+    print(l2)
+    print(len(l2))
+    print(l2.tail.prev().data)
+    l2.insert(a7, index=2) # вставим на место a2 (индекс 2) вставим a7. Теперь последовательность a5 - a1 - a7 - a2 - a3 - a4 - a6
     print(l2.head.next_.next_.data) # удостоверимся, что третьим с начала элементом будет a7
     print("Длина списка l2: ", len(l2)) # проверим работу __len__ - должно быть 7
     print(l2) # смотрим на область памяти списка l2
