@@ -76,6 +76,13 @@ class Book(Data):
     def set_value(self, data):
         self.data = data
 
+    def save(self):
+        driver_name = input("Введите название драйвера > ")
+        driver_builder = SDFabric().get_sd_driver(
+            driver_name)  # если мы запускаем через staticmethod, можно скобки в SDFabric убрать
+        self.structure_driver = SDWorker(driver_builder.build())
+        self.structure_driver.save(self.data)
+
     def __str__(self):
         return f"Книга: {self.data}"
 
@@ -231,7 +238,7 @@ class Library(Observer):
 
         if d is not None:
             book.data = d
-            book.notify()
+            #book.notify()
         else:
             print("===========================")
             print("Adding a book in the catalog... \n"
@@ -418,8 +425,8 @@ class Library(Observer):
                     print(f"Found {len(new_catalog)} book(s)")
                     print("===========================")
                     while True:
-                        print("Do you want to search in the found books?")
-                        answer = input("Press <y> for yes and <n> for no: ")
+                        print("Do you want to search in the found books or save results in file?")
+                        answer = input("Press <y> for continue search, <s> for save, <n> for exit,: ")
                         if answer == "y":
                             self = lib2
                             new_catalog = []  # для нового поиска новый список
@@ -427,12 +434,15 @@ class Library(Observer):
                         elif answer == "n":
                             print("===========================")
                             break
+                        elif answer == "s":
+                            lib2.save()
                         else:
                             print("Wrong answer. Try again")
                     if answer == "n":
                         break
 
         if len(new_catalog) >= 1:
+            print(lib2)
             return lib2
 
     def edit(self):
@@ -842,6 +852,8 @@ if __name__ ==  "__main__":
     #            ]
     lib = Library()
     base()
+    #b = Book(data={0: {"Title": "Harry potter and the philosopher's stone", "Author": "J.K. Rowling", "Genre": "fantasy", "Pages": 346, "Format": "paperback", "Publish year": 1997}})
+    #b.save()
     # lib = Library()
     # lib.add()
     # print(lib)
